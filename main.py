@@ -138,17 +138,17 @@ def check_options(pieces, locations, turn):
         location = locations[i]
         piece = pieces[i]
         if piece == 'pawn':
-            moves_list = check_pawn(locations, turn)
+            moves_list = check_pawn(location, turn)
         elif piece == 'rook':
-            moves_list = check_rook(locations, turn)    
+            moves_list = check_rook(location, turn)    
         elif piece == 'knight':
-            moves_list = check_knight(locations, turn)
+            moves_list = check_knight(location, turn)
         elif piece == 'bishop':
-            moves_list = check_bishop(locations, turn)  
+            moves_list = check_bishop(location, turn)  
         elif piece == 'queen':
-            moves_list = check_queen(locations, turn)
+            moves_list = check_queen(location, turn)
         elif piece == 'king':
-            moves_list = check_king(locations, turn) 
+            moves_list = check_king(location, turn) 
         all_moves_list.append(moves_list)      
     return all_moves_list
        
@@ -307,7 +307,7 @@ def check_valid_moves():
 # draw valid moves on screen
 def draw_valid(moves):
     for i in range(len(moves)):
-        pygame.draw.circle(screen, gold, (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
+        pygame.draw.circle(screen, "gold", (moves[i][0] * 100 + 50, moves[i][1] * 100 + 50), 5)
       
 # draw captures pieces on the side of the screen
 def draw_captured():
