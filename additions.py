@@ -175,6 +175,11 @@ def check_pawn(position, colour):
             moves_list.append((position[0] + 1, position[1] + 1))
         if (position[0] - 1, position[1] + 1) in black_locations:
             moves_list.append((position[0] - 1, position[1] + 1))
+        # check en passant move
+        if (position[0] + 1, position[1] + 1) == black_ep:
+            moves_list.append((position[0] + 1, position[1] + 1))
+        if (position[0] - 1, position[1] + 1) == black_ep:
+            moves_list.append((position[0] - 1, position[1] + 1))
     else:
         if (position[0], position[1] - 1) not in white_locations and \
                 (position[0], position[1] - 1) not in black_locations and position[1] > 0:
@@ -186,8 +191,13 @@ def check_pawn(position, colour):
             moves_list.append((position[0] + 1, position[1] - 1))
         if (position[0] - 1, position[1] - 1) in white_locations:
             moves_list.append((position[0] - 1, position[1] - 1))
+        # check en passant move
+        if (position[0] + 1, position[1] - 1) == white_ep:
+            moves_list.append((position[0] + 1, position[1] - 1))
+        if (position[0] - 1, position[1] - 1) == white_ep:
+            moves_list.append((position[0] - 1, position[1] - 1))
     return moves_list
-
+    
 # check valid queen moves
 def check_queen(position, colour):
     # queen's movement is a combination of bishop's and rook's
@@ -266,7 +276,24 @@ def draw_game_over():
     screen.blit(font.render(f'{winner} won the game!', True, 'white'), (210, 210))
     screen.blit(font.render(f'Press ENTER to Restart!', True, 'white'), (210, 240))
 
-             
+
+# check en passant 
+def check_enpassant(old_coords, new_coords):
+    if turn_step<=1:
+        index= white_locations.index(old_coords)
+        ep_coords=(new_coords[0], new_coords[1]-1)
+        piece=white_pieces[index]
+    else:
+        index= black_locations.index(old_coords)
+        ep_coords=(new_coords[0], new_coords[1]+1)
+        piece=black_pieces[index]  
+    if piece == 'pawn' and abs(old_coords[1]-new_coords[1]) > 1:
+        # if piece was pawn and moved two spaces, return EP coords as defined above
+        pass
+    else:
+        ep_coords=(100,100)
+    return ep_coords
+       
 # main game loop
 black_options = check_options(black_pieces,black_locations, 'black')
 white_options = check_options(white_pieces, white_locations, 'white')
@@ -310,6 +337,7 @@ while run:
                         turn_step=1
                 # if statement runs when the whites' player selects a destination square for the selected white piece
                 if click_coords in valid_moves and selection != 100 :
+                    white_ep = check_enpassant(white_locations[selection], click_coords)
                     white_locations[selection]=click_coords
                     if click_coords in black_locations:
                         # get the index of the captured black piece in the black_pieces
@@ -320,6 +348,15 @@ while run:
                             winner='white'
                         black_pieces.pop(black_piece)
                         black_locations.pop(black_piece)
+                    # en passant piece capture
+                    if click_coords == black_ep:
+                        # get the index of the captured black piece in the black_pieces
+                        black_piece=black_locations.index((black_ep[0], black_ep[1]-1))
+                        # add the captured black pieces into captured_pieces_white and remove the piece from list of black pieces and their locations
+                        captured_pieces_white.append(black_pieces[black_piece])
+                        black_pieces.pop(black_piece)
+                        black_locations.pop(black_piece)
+                        
                     black_options = check_options(black_pieces,black_locations, 'black')
                     white_options = check_options(white_pieces, white_locations, 'white')
                     # now it is black's turn
@@ -337,6 +374,7 @@ while run:
                         turn_step=3
                 # if statement runs when the blacks' player selects a destination square for the selected black piece
                 if click_coords in valid_moves and selection != 100 :
+                    black_ep = check_enpassant(black_locations[selection], click_coords)
                     black_locations[selection]=click_coords
                     if click_coords in white_locations:
                         # get the index of the captured white piece in the white_pieces
@@ -345,6 +383,14 @@ while run:
                         captured_pieces_black.append(white_pieces[white_piece])
                         if white_pieces[white_piece]== 'king':
                             winner='black'
+                        white_pieces.pop(white_piece)
+                        white_locations.pop(white_piece)
+                    # en passant piece capture
+                    if click_coords == white_ep:
+                        # get the index of the captured white piece in the white_pieces
+                        white_piece=white_locations.index((white_ep[0], white_ep[1]+1))
+                        # add the captured white pieces into captured_pieces_black and remove the piece from list of white pieces and their locations
+                        captured_pieces_black.append(white_pieces[white_piece])
                         white_pieces.pop(white_piece)
                         white_locations.pop(white_piece)
                     black_options = check_options(black_pieces,black_locations, 'black')
@@ -377,8 +423,7 @@ while run:
     
     if winner != '':
         game_over = True
-        draw_game_over()
-                    
+        draw_game_over()   
             
     pygame.display.flip()
     
