@@ -85,3 +85,6 @@ game_over = False
 
 white_ep=(100,100)
 black_ep=(100,100)
+white_promote = False
+black_promote= False
+promo_index = 100
